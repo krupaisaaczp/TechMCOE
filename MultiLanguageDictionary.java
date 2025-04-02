@@ -1,4 +1,3 @@
-// 4. Multi-Language Dictionary
 import java.util.*;
 
 // Generic class for dictionary entry with bounded type parameter
@@ -79,7 +78,7 @@ public class MultiLanguageDictionary<T extends Comparable<? super T>> {
     }
     
     public void addWord(String sourceLanguage, DictionaryEntry<T> entry) {
-        // Make sure the language is supported
+        // Ensure language exists
         if (!supportedLanguages.contains(sourceLanguage)) {
             addLanguage(sourceLanguage);
         }
@@ -111,48 +110,63 @@ public class MultiLanguageDictionary<T extends Comparable<? super T>> {
             // Check if entry already exists
             DictionaryEntry<T> existingEntry = targetDictionary.get(translatedWord);
             if (existingEntry != null) {
-            // Merge translations and examples into the existing entry
-            existingEntry.getTranslations().put(sourceLanguage, entry.getWord());
-            for (String example : entry.getExamples()) {
-                existingEntry.addExample("Translation of: " + example);
+                // Merge translations and examples
+                existingEntry.getTranslations().put(sourceLanguage, entry.getWord());
+                for (String example : entry.getExamples()) {
+                    existingEntry.addExample("Translation of: " + example);
+                }
+            } else {
+                // Add the new translated entry
+                targetDictionary.put(translatedWord, translatedEntry);
             }
-        } else {
-            // Add the new translated entry
-            targetDictionary.put(translatedWord, translatedEntry);
         }
     }
-}
-
-public DictionaryEntry<T> getWordEntry(String language, T word) {
-    if (!supportedLanguages.contains(language)) {
-        return null;
-    }
-    return languageDictionaries.get(language).get(word);
-}
-
-public void displayDictionary(String language) {
-    if (!supportedLanguages.contains(language)) {
-        System.out.println("Language not supported: " + language);
-        return;
-    }
-    System.out.println("Dictionary for " + language + ":");
-    for (DictionaryEntry<T> entry : languageDictionaries.get(language).values()) {
-        System.out.println(entry + " - Translations: " + entry.getTranslations());
-        System.out.println("Examples: " + entry.getExamples());
-    }
-}
-
-public static void main(String[] args) {
-    MultiLanguageDictionary<String> dictionary = new MultiLanguageDictionary<>();
-    dictionary.addLanguage("English");
-    dictionary.addLanguage("Spanish");
     
-    DictionaryEntry<String> word1 = new DictionaryEntry<>("Hello", "Interjection");
-    word1.addTranslation("Spanish", "Hola");
-    word1.addExample("Hello, how are you?");
+    public DictionaryEntry<T> getWordEntry(String language, T word) {
+        if (!supportedLanguages.contains(language) || !languageDictionaries.get(language).containsKey(word)) {
+            return null;
+        }
+        return languageDictionaries.get(language).get(word);
+    }
     
-    dictionary.addWord("English", word1);
-    
-    dictionary.displayDictionary("English");
-    dictionary.displayDictionary("Spanish");
+    public void displayDictionary(String language) {
+        if (!supportedLanguages.contains(language)) {
+            System.out.println("Language not supported: " + language);
+            return;
+        }
+        System.out.println("\n=== Dictionary for " + language + " ===");
+        for (DictionaryEntry<T> entry : languageDictionaries.get(language).values()) {
+            System.out.println(entry + " - Translations: " + entry.getTranslations());
+            System.out.println("Examples: " + entry.getExamples());
+            System.out.println("------------------------------------");
+        }
+    }
+
+    public static void main(String[] args) {
+        MultiLanguageDictionary<String> dictionary = new MultiLanguageDictionary<>();
+        dictionary.addLanguage("English");
+        dictionary.addLanguage("Spanish");
+        dictionary.addLanguage("French");
+
+        // Adding English word
+        DictionaryEntry<String> word1 = new DictionaryEntry<>("Hello", "Interjection");
+        word1.addTranslation("Spanish", "Hola");
+        word1.addTranslation("French", "Bonjour");
+        word1.addExample("Hello, how are you?");
+        
+        dictionary.addWord("English", word1);
+
+        // Adding Spanish word
+        DictionaryEntry<String> word2 = new DictionaryEntry<>("Adiós", "Interjection");
+        word2.addTranslation("English", "Goodbye");
+        word2.addTranslation("French", "Au revoir");
+        word2.addExample("Adiós, nos vemos mañana.");
+        
+        dictionary.addWord("Spanish", word2);
+
+        // Display dictionaries
+        dictionary.displayDictionary("English");
+        dictionary.displayDictionary("Spanish");
+        dictionary.displayDictionary("French");
+    }
 }
